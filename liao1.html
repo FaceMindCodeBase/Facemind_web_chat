@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Chat Page</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+
+    .video-player {
+      width: 70%;
+      position: relative;
+    }
+
+    .video-container {
+      width: 100%;
+      height: 100%;
+      background-color: #333;
+      /* Placeholder for video player */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .controls {
+      width: 100%;
+      height: 10%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(0, 0, 0, 0.5);
+      position: absolute;
+      bottom: 0;
+    }
+
+    .chat-room {
+      width: 30%;
+      height: 100%;
+      background-color: #f0f0f0;
+      padding: 10px;
+      overflow-y: auto;
+      /* Enable scrolling if content is taller than container */
+      font-size: 12px;
+    }
+
+    .chat-log {
+      height: 80%;
+      overflow-y: auto;
+      /* Enable scrolling if chat log is taller than container */
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .chat-message {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .chat-message.odd img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    .chat-message.even img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      margin-right: -4px;
+    }
+
+    .chat-input {
+      height: 20%;
+      display: flex;
+      align-items: center;
+      padding: 5px;
+    }
+
+    .chat-input input[type="text"] {
+      flex-grow: 1;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    .chat-input button {
+      margin-left: 0px;
+      /*发送按钮设置样式*/
+      padding: 5px 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .control-button {
+      margin: 0 5px;
+      padding: 5px 10px;
+      background-color: #fff;
+      color: #333;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .chat-message {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      clear: both;
+      /* 清除浮动 */
+    }
+
+   .chat-message-text.odd {
+      border-left: 2px solid #ccc;
+      padding-left: 10px;
+      max-width: 70%;
+      /* 限制文本宽度，防止过宽 */
+      font-size: 12px;
+      color: white;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #4fa1d9;
+    }
+
+    .chat-message .odd {
+      background-color: #4fa1d9;
+    }
+
+    #ceshi {
+      background-color: #4fa1d9;
+    }
+
+    #ceshi2 {
+      background-color: white;
+      font-size: 12px;
+      color: #000000
+    }
+
+    .chat-message-text.even {
+      border-left: 2px solid #ccc;
+      padding: 3px;
+      max-width: 70%;
+      /* 限制文本宽度，防止过宽 */
+      font-size: 12px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: white;
+    }
+
+    .chat-aa::before {
+      content: "";
+      position: absolute;
+      top: 10px;
+      left: -10px;
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 10px 10px 10px 0;
+      border-color: transparent #f0f0f0 transparent transparent;
+    }
+
+    /* 为奇数消息添加左缩进 */
+    .chat-message.odd {
+      margin-left: 0px;
+      /* 根据需要调整缩进量 */
+    }
+
+    /* 为偶数消息添加右缩进，并浮动到右侧 */
+    .chat-message.even {
+      float: right;
+      /* 浮动到右侧 */
+    }
+
+    /* 清除输入框前的浮动，防止影响布局 */
+    .chat-input {
+      clear: both;
+    }
+
+    /*气泡*/
+    /*尖角在左侧*/
+    .pop .arrow {
+      position: absolute;
+      top: 5px;
+      left: -16px;
+      /* 圆角的位置需要细心调试哦 */
+      width: 0;
+      height: 0;
+      font-size: 0;
+      border: solid 8px;
+      border-color: #f1e8e8ad #4fa1d9 #f1e8e8ad #f1e8e8ad;
+
+    }
+
+    .pop {
+      position: relative;
+      width: auto;
+      max_width: auto；
+      height：35px;
+      background：#4fa1d9;
+      color：#fff;
+      border-radius：5px;
+      border：1px solid #4fa1d9;
+      font-size：12px;
+      line-height：32px；
+      padding：3px;
+    }
+
+    .pop .afterr {
+      position: absolute;
+      top: 5px;
+      left: 191px;
+      width: 0;
+      height: 0;
+      font-size: 0;
+      border: solid 8px;
+      border-color: #ccc #ccc #ccc #fff;
+    }
+
+    .select_bot {
+      color: #4fa1d9
+    }
+
+    .wenzi {
+      position: relative;
+      animation: moveText 2s linear infinite;
+      color: #ff0000;
+      /* 红色 */
+      background-color: #000000;
+      /* 黑色 */
+    }
+
+    @keyframes moveText {
+      0% {
+        left: 0;
+      }
+
+      100% {
+        left: 100px;
+        /* 你可以根据需要调整这个值 */
+      }
+    }
+
+    .exiting a {
+      float: right;
+      color: #caa;
+      padding-right: 1px;
+    }
+
+    #animation {
+      background-image: url('css_sprites.png');
+      background-repeat: no-repeat;
+      height: 502px;
+      width: 474px;
+      position: relative;
+      -webkit-animation: girlRun 0.5s steps(1, end) infinite;
+      -webkit-animation-play-state: paused; //图片暂停
+    }
+
+    @-webkit-keyframes girlRun {
+
+      /* ...省略关键帧定义... */
+      0% {
+        width: 474px;
+        height: 502px;
+        background: url('css_sprites.png') -10px -10px;
+      }
+
+
+      30% {
+        width: 474px;
+        height: 502px;
+        background: url('css_sprites.png') -10px -532px;
+      }
+
+
+      100% {
+        width: 100px;
+        height: 105px;
+        background: url('css_sprites.png') -998px -1054px;
+      }
+    }
+
+    #control {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+    }
+    #play-pause-btn {  
+  /* 设置按钮的基本样式 */  
+  display: inline-block;  
+  padding: 10px 10px;  
+  font-size: 9px;  
+  color: #fff;  
+  background-color: #333; /* 背景色 */  
+  border: none; /* 无边框 */  
+  border-radius: 5px; /* 圆角 */  
+  cursor: pointer; /* 鼠标悬停时变为手型 */  
+  transition: background-color 0.3s ease; /* 背景色变化过渡效果 */  
+  outline: none; /* 移除点击时的轮廓 */  
+  position: relative; /* 以便定位伪元素 */  
+}  
+  
+#play-pause-btn:hover {  
+  background-color: #555; /* 鼠标悬停时的背景色 */ 
+  font-size: 9px;
+}  
+  
+#play-pause-btn::before {  
+  /* 使用伪元素来添加播放图标 */  
+  content: '';  
+  display: inline-block;  
+  width: 0;  
+  height: 0;  
+  border-style: solid;  
+  border-width: 10px 0 10px 16px;  
+  border-color: transparent transparent transparent #fff;  
+  margin-right: 10px; /* 与文本之间的间距 */  
+  vertical-align: middle; /* 垂直居中 */  
+  font-size: 9px;
+}  
+  
+#play-pause-btn.paused::before {  
+  /* 当按钮处于暂停状态时，改变图标 */  
+  border-width: 0 0 16px 10px;  
+  border-color: transparent transparent #fff transparent; 
+  font-size: 9px; 
+}
+#myCanvas{
+width:100vh;
+height:40vw;
+}
+  </style>
+</head>
+
+<body>
+  <script type="text/javascript" src="./js/jquery.min.js"></script>
+  <div class="container">
+    <div class="video-player">
+      <div class="video-container">
+        <!-- <span class="vimg" id="animation">
+        </span> -->
+        <canvas id="myCanvas"></canvas>
+          <button id="play-pause-btn">播放/暂停</button>  
+
+          <audio id="audio-player" preload="auto">  
+            Your browser does not support the audio element.  
+          </audio>  
+        <br />
+        <span class="wenzi"></span>
+      </div>
+      <!-- <button id="playBtn">播放动画</button>
+    <button id="stopBtn">停止动画</button> -->
+
+
+    </div>
+
+    <div class="chat-room">
+      <div class="chat-log">
+        <!-- 假设这是第一条消息，即奇数消息 -->
+        <!-- 更多聊天消息可以在这里继续添加 -->
+      </div>
+      <div>&nbsp;&nbsp;发送至:<span class="select_bot"></span><span class="exiting"><a href="login.html">退出</a></span>
+      </div>
+      <div class="chat-input">
+        <form class="register-form" method="post">
+          <textarea name="ask_content" class="ask_content" placeholder="请输入您想问的内容..."
+            style="width:380px;height:100px;border:0px"></textarea>
+          <button type="submit" class="enter-btn">发送</button><span class="itips"></span>
+        </form>
+      </div>
+
+    </div>
+    <script>
+      $(document).ready(function () {
+
+        // 弹出来bear token
+        // <!--    alert("Bear Token: " + bearToken);-->
+        $(".register-form").submit(function (e) {
+          e.preventDefault(); //阻止表单默认提交行为
+          var urlParams = new URLSearchParams(window.location.search);
+          var bearToken = urlParams.get('token');
+          var bot = urlParams.get('bot');
+          var ask_content = $(".ask_content").val().trim();
+          if (bot === '') {
+            alert('请选择对话角色');
+            return false;
+          }
+          if (ask_content === '') {
+            $(".wenzi").html('别让输入框寂寞，填点内容吧！');
+            return false;
+          } else {
+            if (ask_content.length < 5) {
+              $(".wenzi").html('字数太少了，不少于5个字哦！');
+              return false;
+            }
+          }
+
+          $.ajax({
+            type: "POST",
+            url: "http://otaku.facemind.wiki:6003/web_chat/",
+            // <!--                        url: "http://otaku.facemind.wiki:5001/chat/",-->
+            data: JSON.stringify({ "tpye": "llm", "bot": bot, "user_ask": ask_content, "model": "QWEN" }),
+            contentType: "application/json",
+            headers: {
+              'Authorization': bearToken
+            },
+            success: function (response) {
+              if (response !== null && response.image_piece_num > 0) {
+                pstr = `
+                                <div class="chat-message even">
+                                          <div class="pop" id="ceshi2">
+                                          `+ ask_content + `
+                                          </div>
+                                           <img src="img/b.jpg" alt="用户">
+                                        </div>
+                                         <div class="chat-message odd">
+                                          <img src="img/g.jpg" alt="bot">
+                                          <div class="pop" id="ceshi">
+                                            <div class="arrow"></div>
+                                           `+ response.audio_describe + `
+                                          </div>
+                                        </div>
+
+                                      `
+                $(".chat-log").append(pstr)
+                $(".wenzi").html(response.audio_describe)
+                $(".ask_content").val('')
+                vstr = `
+                                        <img src="`+ response.download_url + `0.png"/>
+                                      `
+                $(".vimg").html(vstr)
+                //============================\\\==============
+                var images = [];
+                   //////////===========语音处理=========start=======
+        var audioPlayer = $('#audio-player')[0];  
+            var isAPlaying = false;  
+            var currentAudioIndex = 0; 
+            var downburl= response.download_url;
+            var audioPieceNum=response.audio_piece_num;
+            var audioFiles =[];
+            for (var i = 0; i < audioPieceNum; i++) {
+                  adownloadUrl = downburl + i+'.wav';
+                  audioFiles.push(adownloadUrl);
+                }
+            // var imagePieceNum=response.image_piece_num;
+            var imagePieceNum=audioPieceNum+5;
+            var imageFiles =[];
+            for (var j = 0; j < imagePieceNum; j++) {
+                  imgdownloadUrl = downburl + j+'.png';
+                  imageFiles.push(imgdownloadUrl);
+            }
+            bobotu(imageFiles);
+            playNextAudio();
+            function playNextAudio() {
+                currentAudioIndex = (currentAudioIndex + 1) % audioFiles.length;
+                audioPlayer.src = audioFiles[currentAudioIndex];
+                if(currentAudioIndex>=audioPieceNum-1){
+                  $('#play-pause-btn').trigger('click');
+                  stopAnimation();
+                  return 0;
+                }
+                audioPlayer.play();
+            }
+
+            // 绑定播放/暂停按钮的点击事件  
+            $('#play-pause-btn').click(function() {  
+                if (isAPlaying) {  
+                    audioPlayer.pause();  
+                    isAPlaying = false;  
+                    $(this).text('播放'); 
+                    stopAnimation();
+                } else {  
+                    audioPlayer.src = audioFiles[currentAudioIndex];  
+                    audioPlayer.play();  
+                    isAPlaying = true;  
+                    $(this).text('暂停');
+                    bobotu(imageFiles);
+                }  
+            });  
+
+            // 当音频播放结束时，自动切换到下一个音频文件并开始播放
+            audioPlayer.addEventListener('ended', function() {  
+                playNextAudio();
+            }); 
+        //////////===========语音处理=========end=======
+        //////////===========图片处理=========begin=========
+        var canvas = document.getElementById('myCanvas');
+        var ctx = canvas.getContext('2d');
+       
+        var currentImageIndex = 0;
+        var animationSpeed = 32; // 动画速度，数值越小速度越快
+        var animationId;
+
+        function drawImage() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(images[currentImageIndex], 0, 0, canvas.width, canvas.height);
+            currentImageIndex = (currentImageIndex + 1) % images.length;
+            animationId = setTimeout(drawImage, animationSpeed);
+        }
+
+        function loadImages(urls) {
+            return new Promise((resolve, reject) => {
+                let loadedImages = 0;
+                for (let i = 0; i < urls.length; i++) {
+                    let img = new Image();
+                    img.onload = () => {
+                        loadedImages++;
+                        if (loadedImages === urls.length) {
+                            resolve(images);
+                        }
+                    };
+                    img.src = urls[i];
+                    images.push(img);
+                }
+            });
+        }
+
+        function playAnimation() {
+            drawImage();
+        }
+
+        function stopAnimation() {
+            clearTimeout(animationId);
+        }
+
+        $('#playBtn').click(function() {
+            // 假设你已经获取到了图片URL数组
+            var imageUrls = [
+                '0.png',
+                '1.png',
+                '2.png',
+                '3.png',
+                '4.png'
+            ];
+
+            loadImages(imageUrls).then(() => {
+                playAnimation();
+            });
+        });
+        function bobotu(imageUrls) {
+            // 假设你已经获取到了图片URL数组
+            // var imageUrls = [
+            //     '0.png',
+            //     '1.png',
+            //     '2.png',
+            //     '3.png',
+            //     '4.png'
+            // ];
+
+            loadImages(imageUrls).then(() => {
+                playAnimation();
+            });
+        }
+
+        $('#stopBtn').click(function() {
+            stopAnimation();
+        });
+        /////////============图片处理=========end===========
+                  //============================///==============
+              } else {
+                //$(".errormsg").html(response.message);
+                $(".wenzi").html("系统小情绪啦，人多稍候哦，别急别急~")
+                //kaishi===========
+                if (ask_content != '' && bot != '' && response !== null && response.sentiment !== null) {
+                  var requestData = {
+                    "bot": bot,
+                    "text_user": ask_content,
+                    "text_bot": response.audio_describe,
+                    "text_describe": "dialogue"// 或者 'dialogue'  prerecord
+                  };
+
+                  // 调用函数并发送请求
+                  sendTalkHistory(token, requestData);
+                }
+
+                ///////
+              }
+            },
+            error: function (error) {
+              alert("请求失败了");
+            }
+          });
+        });
+        //kaishi====222=======
+        var acanvas = document.getElementById('myCanvas');  
+    var actx = acanvas.getContext('2d');  
+    var imga = new Image();  
+  
+    // 图片加载完成后的回调函数  
+    imga.onload = function() {  
+        actx.drawImage(imga, 0, 0, 800, 800);  
+    };  
+  
+    // 设置图片源（替换为你的图片URL）  
+    imga.src = '0.png'; // 确保这是有效的图片路径
+        // 假设token是从某个地方获取的，比如localStorage
+        var urlParams = new URLSearchParams(window.location.search);
+        var bearToken = urlParams.get('token');
+        var token = bearToken;
+        var bot = urlParams.get('bot');
+        var number = 1000; // 查询最近的10条记录
+        $(".select_bot").html(bot)
+        function fetchChatHistory() {
+          $.ajax({
+            // <!--            url: 'http://54.222.206.196:8000/dialogue/history/',-->
+            url: 'http://71.132.62.209:8000/dialogue/history_list/',
+            type: 'POST',
+            headers: {
+              'Authorization': bearToken
+            },
+            data: JSON.stringify({
+              number: number,
+              bot: bot
+            }),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (response) {
+              if (response.code === 200) {
+                var chatLog = $('.chat-log');
+                chatLog.empty(); // 清空之前的消息
+                $.each(response.data, function (index, message) {
+                  var isOdd = index % 2 !== 0;
+                  var chatMessageDiv = $('<div>').addClass('chat-message ' + (isOdd ? 'odd' : 'even'));
+
+                  // 插入头像
+                  var img;
+                  //var img = $('<img>').attr('src', isOdd ? 'img/g.jpg' : 'img/b.jpg').attr('alt', message.text);
+                  if (isOdd != 0) {
+                    astr = `
+                                <img src="img/g.jpg" alt="`+ message.username + `">
+                                <div class="pop" id="ceshi">
+                                <div class="arrow"></div>
+                               `+ message.text + `
+                                </div>
+                            `
+                    img = astr
+                  } else {
+                    astr = `
+                                <div class="pop" id="ceshi2">`+ message.text + `</div>
+                                <img src="img/b.jpg" alt="`+ message.username + `">
+                            `
+                    img = astr
+                  }
+                  chatMessageDiv.append(img);
+
+                  // 插入消息内容
+                  chatLog.append(chatMessageDiv);
+                  //ceces
+                  
+                });
+              } else {
+                // <!--                    alert('Error: ' + response.message);-->
+                $(".wenzi").html("初次见面，让我们一起聊聊吧~")
+              }
+            },
+            error: function (xhr, status, error) {
+              alert('Request failed: ' + error);
+            }
+          });
+        }
+        /*
+          增加聊天记录
+        */
+        function sendTalkHistory(token, data, additionalConfig) {
+          alert(2222)
+          // 合并默认配置和额外配置
+          var config = {
+            // <!--                    url: 'http://71.132.62.209:8000/dialogue/history_list/',-->
+            url: 'http://71.132.62.209:8000/dialogue/add_talk_history/',
+            type: 'POST',
+            headers: {
+              'Authorization': token
+            },
+            data: JSON.stringify(data),
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            success: function (response) {
+              console.log('Success:', response);
+            },
+            error: function (xhr, status, error) {
+              console.error('Error:', error);
+            }
+          };
+
+          // 使用jQuery的$.extend合并对象，以允许扩展配置
+          $.extend(config, additionalConfig);
+
+          // 发送请求
+          $.ajax(config);
+        }
+        // 调用函数获取聊天历史
+        fetchChatHistory();
+        //end==========
+       
+      });
+    </script>
+</body>
+
+</html>
